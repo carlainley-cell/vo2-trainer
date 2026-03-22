@@ -213,71 +213,72 @@
 <script>
 const SESSIONS = [
   { day:"Mon", name:"Stair Climber HIIT", dur:25, equip:["Stair climber"], phases:[
-    {n:"Warm-up",            sub:"Z2 · 98–114 bpm · Easy pace, no rails",              secs:300, zk:"z2", hr:"Stay easy — reach 98–114 bpm before first interval"},
-    {n:"Work 1",             sub:"Z4 · 130–147 bpm · Drive through heel, full steps",  secs:45,  zk:"z4", hr:"Push hard — target 130–147 bpm. Hands off rails!"},
-    {n:"Rest 1",             sub:"Z3 · <130 bpm · Drop speed, breathe",               secs:60,  zk:"z3", hr:"HR must drop below 130 before next interval"},
-    {n:"Work 2",             sub:"Z4 · 130–147 bpm · Match interval 1 pace",           secs:45,  zk:"z4", hr:"Same effort as interval 1."},
-    {n:"Rest 2",             sub:"Z3 · <130 bpm · Easy steps, nose-breathe",          secs:60,  zk:"z3", hr:"Breathe through your nose if you can"},
-    {n:"Work 3",             sub:"Z4 · 130–147 bpm · Upright posture, no leaning",     secs:45,  zk:"z4", hr:"Stay upright — don't lean on the machine"},
-    {n:"Rest 3",             sub:"Z3 · <130 bpm · Extend if HR still >135",           secs:60,  zk:"z3", hr:"Still above 135? Add 30 seconds here."},
-    {n:"Work 4",             sub:"Z4 · 130–147 bpm · Try double-stepping",             secs:45,  zk:"z4", hr:"Half-way! Double-step if feeling strong."},
-    {n:"Rest 4",             sub:"Z3 · <130 bpm · Check recovery speed",              secs:60,  zk:"z3", hr:"4 of 8 done. HR recovering well?"},
-    {n:"Work 5",             sub:"Z4 · 130–147 bpm · Adaptation happening now",        secs:45,  zk:"z4", hr:"These last 4 intervals are the real stimulus"},
-    {n:"Rest 5",             sub:"Z3 · <130 bpm · Relax shoulders, slow breathing",   secs:60,  zk:"z3", hr:"Relax. Drop your shoulders. Slow breath."},
-    {n:"Work 6",             sub:"Z4 · 130–147 bpm · Match early interval pace",       secs:45,  zk:"z4", hr:"Don't fade — match your early effort"},
-    {n:"Rest 6",             sub:"Z3 · <130 bpm · Shorten next if HR not dropping",   secs:60,  zk:"z3", hr:"Not recovering? Shorten next interval to 30s"},
-    {n:"Work 7",             sub:"Z4 · 130–147 bpm · Full steps, upright",             secs:45,  zk:"z4", hr:"One more after this. Everything you have."},
-    {n:"Rest 7",             sub:"Z3 · <130 bpm · Almost there",                       secs:60,  zk:"z3", hr:"One interval left. Nearly done."},
-    {n:"Work 8",             sub:"Z4 · 130–147 bpm · FINAL interval",                  secs:45,  zk:"z4", hr:"FINAL push — stay in Zone 4!"},
-    {n:"Rest 8",             sub:"Z3 · <130 bpm · Let HR settle",                     secs:60,  zk:"z3", hr:"Intervals complete! Well done."},
-    {n:"Cool-down",          sub:"Z2 · <114 bpm · Slowest pace",                      secs:180, zk:"cool",hr:"HR below 100 before stepping off"},
-    {n:"Walking cool-down",  sub:"Z1 · <98 bpm · Step off and stretch",              secs:180, zk:"z1",  hr:"Stretch hip flexors and calves"},
-    {n:"Done",               sub:"Log your session →",                                secs:0,   zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+    {n:"Warm-up",           sub:"Z2 · 98–114 bpm · Easy pace, no rails",             secs:300, zk:"z2",  hr:"Stay easy — reach 98–114 bpm before first interval"},
+    {n:"Work 1",            sub:"Z4 · 130–147 bpm · Drive through heel, full steps", secs:45,  zk:"z4",  hr:"Push hard — target 130–147 bpm. Hands off rails!"},
+    {n:"Rest 1",            sub:"Z3 · <130 bpm · Drop speed, breathe",              secs:60,  zk:"z3",  hr:"HR must drop below 130 before next interval"},
+    {n:"Work 2",            sub:"Z4 · 130–147 bpm · Match interval 1 pace",          secs:45,  zk:"z4",  hr:"Same effort as interval 1"},
+    {n:"Rest 2",            sub:"Z3 · <130 bpm · Easy steps, nose-breathe",         secs:60,  zk:"z3",  hr:"Breathe through your nose if you can"},
+    {n:"Work 3",            sub:"Z4 · 130–147 bpm · Upright posture, no leaning",    secs:45,  zk:"z4",  hr:"Stay upright — don't lean on the machine"},
+    {n:"Rest 3",            sub:"Z3 · <130 bpm · Extend if HR still >135",          secs:60,  zk:"z3",  hr:"Still above 135? Add 30 seconds here"},
+    {n:"Work 4",            sub:"Z4 · 130–147 bpm · Try double-stepping",            secs:45,  zk:"z4",  hr:"Half-way! Double-step if feeling strong"},
+    {n:"Rest 4",            sub:"Z3 · <130 bpm · Check recovery speed",             secs:60,  zk:"z3",  hr:"4 of 8 done. HR recovering well?"},
+    {n:"Work 5",            sub:"Z4 · 130–147 bpm · Adaptation happening now",       secs:45,  zk:"z4",  hr:"These last 4 intervals are the real stimulus"},
+    {n:"Rest 5",            sub:"Z3 · <130 bpm · Relax shoulders, slow breathing",  secs:60,  zk:"z3",  hr:"Relax. Drop your shoulders. Slow breath."},
+    {n:"Work 6",            sub:"Z4 · 130–147 bpm · Match early interval pace",      secs:45,  zk:"z4",  hr:"Don't fade — match your early effort"},
+    {n:"Rest 6",            sub:"Z3 · <130 bpm · Shorten next if HR not dropping",  secs:60,  zk:"z3",  hr:"Not recovering? Shorten next interval to 30s"},
+    {n:"Work 7",            sub:"Z4 · 130–147 bpm · Full steps, upright",            secs:45,  zk:"z4",  hr:"One more after this. Everything you have."},
+    {n:"Rest 7",            sub:"Z3 · <130 bpm · Almost there",                      secs:60,  zk:"z3",  hr:"One interval left. Nearly done."},
+    {n:"Work 8",            sub:"Z4 · 130–147 bpm · FINAL interval",                 secs:45,  zk:"z4",  hr:"FINAL push — stay in Zone 4!"},
+    {n:"Rest 8",            sub:"Z3 · <130 bpm · Let HR settle",                    secs:60,  zk:"z3",  hr:"Intervals complete! Well done."},
+    {n:"Cool-down",         sub:"Z2 · <114 bpm · Slowest comfortable pace",         secs:180, zk:"cool", hr:"HR below 100 before stepping off"},
+    {n:"Walking cool-down", sub:"Z1 · <98 bpm · Step off and stretch",             secs:180, zk:"z1",   hr:"Stretch hip flexors and calves"},
+    {n:"Done",              sub:"Log your session →",                               secs:0,   zk:"rest", hr:"Tap ↗ to log to Google Sheets"}
   ]},
   { day:"Tue", name:"Incline Walk Zone 2", dur:28, equip:["Treadmill"], phases:[
-    {n:"Flat warm-up",       sub:"Z1 · <98 bpm · 0% incline, easy pace",             secs:120,  zk:"z1",  hr:"Get moving gently before raising the incline"},
-    {n:"Build incline",      sub:"Z2 · 98–114 bpm · Increase to 6–8%",               secs:180,  zk:"z2",  hr:"Same walking pace — just raise the incline"},
-    {n:"Zone 2 incline walk",sub:"Z2 · 98–114 bpm · Conversational pace throughout", secs:1200, zk:"z2",  hr:"If you can't hold a conversation, reduce incline"},
-    {n:"Cool-down flat",     sub:"Z1 · <98 bpm · Remove incline, slow pace",         secs:180,  zk:"cool",hr:"Reduce incline to 0%, slow walk"},
-    {n:"Done",               sub:"Log your session →",                                secs:0,    zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+    {n:"Flat warm-up",       sub:"Z1 · <98 bpm · 0% incline, easy pace",              secs:120,  zk:"z1",  hr:"Active recovery from Monday — keep it gentle"},
+    {n:"Build incline",      sub:"Z2 · 98–114 bpm · Increase to 6–8%",                secs:180,  zk:"z2",  hr:"Same walking pace — just raise the incline"},
+    {n:"Zone 2 incline walk",sub:"Z2 · 98–114 bpm · Conversational pace throughout",  secs:1200, zk:"z2",  hr:"If you can't hold a conversation, reduce the incline"},
+    {n:"Cool-down flat",     sub:"Z1 · <98 bpm · Remove incline, slow pace",          secs:180,  zk:"cool", hr:"Reduce incline to 0%, slow walk to finish"},
+    {n:"Done",               sub:"Log your session →",                                 secs:0,    zk:"rest", hr:"Tap ↗ to log to Google Sheets"}
   ]},
-  { day:"Wed", name:"Cycling Threshold", dur:25, equip:["Stationary bike"], phases:[
-    {n:"Warm-up",           sub:"Z2 · 98–114 bpm · Easy spin 80–90 rpm",       secs:300, zk:"z2",  hr:"Find comfortable resistance before building"},
-    {n:"Build to threshold",sub:"Z3 · 114–130 bpm · Gradually increase load",  secs:300, zk:"z3",  hr:"Increase resistance steadily — don't spike HR"},
-    {n:"Threshold hold",    sub:"Z4 · 130–147 bpm · Hard but sustainable",     secs:480, zk:"z4",  hr:"Short sentences only. Key part of this session."},
-    {n:"Tempo recovery",    sub:"Z3 · 114–130 bpm · Reduce resistance",        secs:240, zk:"z3",  hr:"Maintain cadence, just reduce resistance"},
-    {n:"Cool-down",         sub:"Z1–2 · <110 bpm · Easy spin, flush legs",     secs:180, zk:"cool",hr:"Low resistance, let HR drop naturally"},
-    {n:"Done",              sub:"Log your session →",                            secs:0,   zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+  { day:"Wed", name:"Stair Climber Threshold", dur:25, equip:["Stair climber"], phases:[
+    {n:"Warm-up",         sub:"Z2 · 98–114 bpm · Easy pace, no rails",               secs:300, zk:"z2",  hr:"Build gradually — don't rush into Zone 3"},
+    {n:"Build to Z3",     sub:"Z3 · 114–130 bpm · Increase speed steadily",          secs:240, zk:"z3",  hr:"Breathing should increase — still manageable"},
+    {n:"Build to Z4",     sub:"Z3–4 · 125–140 bpm · Push into lower Zone 4",         secs:180, zk:"z3",  hr:"Approaching threshold — short sentences only"},
+    {n:"Threshold hold",  sub:"Z4 · 130–147 bpm · Sustain — no intervals today",     secs:600, zk:"z4",  hr:"Hold this effort for 10 minutes. This is the key block."},
+    {n:"Tempo step-down", sub:"Z3 · 114–130 bpm · Reduce speed, maintain form",      secs:180, zk:"z3",  hr:"Drop speed slightly — keep stepping, don't stop"},
+    {n:"Cool-down",       sub:"Z2 · <114 bpm · Slowest comfortable pace",            secs:180, zk:"cool", hr:"Let HR fall to below 100 before stepping off"},
+    {n:"Done",            sub:"Log your session →",                                   secs:0,   zk:"rest", hr:"Tap ↗ to log to Google Sheets"}
   ]},
   { day:"Thu", name:"Incline Walk Recovery", dur:30, equip:["Treadmill"], phases:[
-    {n:"Flat warm-up",       sub:"Z1 · <98 bpm · 0% incline",                secs:120,  zk:"z1",  hr:"Active recovery day — keep it easy"},
-    {n:"Build incline",      sub:"Z2 · 98–114 bpm · Increase to 6–8%",       secs:180,  zk:"z2",  hr:"Same walking pace, just increase the incline"},
-    {n:"Zone 2 incline walk",sub:"Z2 · 98–114 bpm · Full conversation pace", secs:1320, zk:"z2",  hr:"You should be able to hold a full conversation"},
-    {n:"Cool-down flat",     sub:"Z1 · <98 bpm · Remove incline",            secs:180,  zk:"cool",hr:"Reduce incline to 0%, slow pace"},
-    {n:"Done",               sub:"Log your session →",                        secs:0,    zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+    {n:"Flat warm-up",       sub:"Z1 · <98 bpm · 0% incline",                 secs:120,  zk:"z1",  hr:"Recovery day — this should feel genuinely easy"},
+    {n:"Build incline",      sub:"Z2 · 98–114 bpm · Increase to 6–8%",        secs:180,  zk:"z2",  hr:"Same walking pace, just increase the incline"},
+    {n:"Zone 2 incline walk",sub:"Z2 · 98–114 bpm · Full conversation pace",  secs:1320, zk:"z2",  hr:"You should be able to hold a full conversation"},
+    {n:"Cool-down flat",     sub:"Z1 · <98 bpm · Remove incline, slow pace",  secs:180,  zk:"cool", hr:"Reduce incline to 0%, slow pace to finish"},
+    {n:"Done",               sub:"Log your session →",                         secs:0,    zk:"rest", hr:"Tap ↗ to log to Google Sheets"}
   ]},
   { day:"Fri", name:"Stair Climber HIIT", dur:25, equip:["Stair climber"], phases:[
-    {n:"Warm-up",            sub:"Z2 · 98–114 bpm · Easy pace, no rails",              secs:300, zk:"z2",  hr:"Get HR up gently before first interval"},
-    {n:"Work 1",             sub:"Z4 · 130–147 bpm · Build to Zone 4",                secs:45,  zk:"z4",  hr:"Full effort — drive through the heels"},
-    {n:"Rest 1",             sub:"Z3 · <130 bpm · Drop speed, breathe",               secs:60,  zk:"z3",  hr:"HR must drop below 130 before next interval"},
-    {n:"Work 2",             sub:"Z4 · 130–147 bpm · Full effort",                    secs:45,  zk:"z4",  hr:"Match interval 1 intensity"},
-    {n:"Rest 2",             sub:"Z3 · <130 bpm · Recovery",                          secs:60,  zk:"z3",  hr:"Breathe through it. HR coming down?"},
-    {n:"Work 3",             sub:"Z4 · 130–147 bpm · Drive those legs",               secs:45,  zk:"z4",  hr:"Half way through work intervals!"},
-    {n:"Rest 3",             sub:"Z3 · <130 bpm · Recovery",                          secs:60,  zk:"z3",  hr:"3 of 6 done. Nice work."},
-    {n:"Work 4",             sub:"Z4 · 130–147 bpm · Stay strong",                    secs:45,  zk:"z4",  hr:"Match your earlier effort."},
-    {n:"Rest 4",             sub:"Z3 · <130 bpm · Check HR",                          secs:60,  zk:"z3",  hr:"Extend rest here if HR not recovering"},
-    {n:"Work 5",             sub:"Z4 · 130–147 bpm · Almost there",                   secs:45,  zk:"z4",  hr:"One more after this — everything you have"},
-    {n:"Rest 5",             sub:"Z3 · <130 bpm · Keep moving",                       secs:60,  zk:"z3",  hr:"Easy steps — keep moving"},
-    {n:"Work 6",             sub:"Z4 · 130–147 bpm · FINAL interval",                 secs:45,  zk:"z4",  hr:"FINAL one. Everything in Zone 4!"},
-    {n:"Zone 2 finish",      sub:"Z2 · 98–114 bpm · Easy steps to finish",            secs:510, zk:"z2",  hr:"Great work — easy steps to bring HR down"},
-    {n:"Cool-down",          sub:"Z1 · <98 bpm · Step off and walk",                  secs:180, zk:"cool",hr:"Intervals complete! Excellent session."},
-    {n:"Done",               sub:"Log your session →",                                secs:0,   zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+    {n:"Warm-up",           sub:"Z2 · 98–114 bpm · Easy pace, no rails",             secs:300, zk:"z2",  hr:"Get HR up gently before first interval"},
+    {n:"Work 1",            sub:"Z4 · 130–147 bpm · Drive through the heels",        secs:45,  zk:"z4",  hr:"Full effort — hands off the rails!"},
+    {n:"Rest 1",            sub:"Z3 · <130 bpm · Drop speed, breathe",              secs:60,  zk:"z3",  hr:"HR must drop below 130 before next interval"},
+    {n:"Work 2",            sub:"Z4 · 130–147 bpm · Match interval 1 intensity",     secs:45,  zk:"z4",  hr:"Same pace as interval 1"},
+    {n:"Rest 2",            sub:"Z3 · <130 bpm · Recovery",                         secs:60,  zk:"z3",  hr:"Breathe through it. HR coming down?"},
+    {n:"Work 3",            sub:"Z4 · 130–147 bpm · Drive those legs",               secs:45,  zk:"z4",  hr:"Half way through — keep it up!"},
+    {n:"Rest 3",            sub:"Z3 · <130 bpm · Recovery",                         secs:60,  zk:"z3",  hr:"3 of 6 done. Nice work."},
+    {n:"Work 4",            sub:"Z4 · 130–147 bpm · Stay strong",                    secs:45,  zk:"z4",  hr:"Match your earlier effort"},
+    {n:"Rest 4",            sub:"Z3 · <130 bpm · Check HR",                         secs:60,  zk:"z3",  hr:"Extend rest here if HR not recovering well"},
+    {n:"Work 5",            sub:"Z4 · 130–147 bpm · Almost there",                   secs:45,  zk:"z4",  hr:"One more after this — give it everything"},
+    {n:"Rest 5",            sub:"Z3 · <130 bpm · Keep moving",                      secs:60,  zk:"z3",  hr:"Easy steps — keep moving"},
+    {n:"Work 6",            sub:"Z4 · 130–147 bpm · FINAL interval",                 secs:45,  zk:"z4",  hr:"FINAL one. Everything in Zone 4!"},
+    {n:"Zone 2 finish",     sub:"Z2 · 98–114 bpm · Easy steps to finish",           secs:510, zk:"z2",  hr:"Great work — easy steps to bring HR down"},
+    {n:"Cool-down",         sub:"Z1 · <98 bpm · Step off and walk",                 secs:180, zk:"cool", hr:"Intervals complete! Excellent session."},
+    {n:"Done",              sub:"Log your session →",                                secs:0,   zk:"rest", hr:"Tap ↗ to log to Google Sheets"}
   ]},
   { day:"Sat", name:"Stair Climber Zone 2", dur:30, equip:["Stair climber"], phases:[
-    {n:"Warm-up",        sub:"Z1–2 · <110 bpm · Very easy pace, find your rhythm", secs:180,  zk:"z2",  hr:"No rails — but keep it very easy today"},
-    {n:"Zone 2 steady",  sub:"Z2 · 98–114 bpm · Long aerobic base — stay easy",    secs:1440, zk:"z2",  hr:"Should feel almost too easy — that's correct for Zone 2"},
-    {n:"Cool-down",      sub:"Z1 · <98 bpm · Slowest pace, then step off",         secs:180,  zk:"cool",hr:"Rest tomorrow — you've earned it"},
-    {n:"Done",           sub:"Week complete — rest tomorrow!",                       secs:0,    zk:"rest",hr:"Tap ↗ to log. Full rest day tomorrow."}
+    {n:"Warm-up",       sub:"Z1–2 · <110 bpm · Very easy, find your rhythm",     secs:180,  zk:"z2",  hr:"Easiest session of the week — no rails needed today"},
+    {n:"Zone 2 steady", sub:"Z2 · 98–114 bpm · Long aerobic base — stay easy",   secs:1440, zk:"z2",  hr:"Should feel almost too easy — that's exactly right"},
+    {n:"Cool-down",     sub:"Z1 · <98 bpm · Slowest pace, then step off",        secs:180,  zk:"cool", hr:"Rest tomorrow — you've earned it"},
+    {n:"Done",          sub:"Week complete — rest tomorrow!",                      secs:0,    zk:"rest", hr:"Tap ↗ to log. Full rest day tomorrow."}
   ]}
 ];
 
