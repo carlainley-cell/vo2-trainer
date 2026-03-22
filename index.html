@@ -281,7 +281,7 @@ const ZK = {
 let sess=0, phase=0, rem=0, ticker=null, running=false, peakHR=0;
 const SHEET_KEY = "vo2_sheet_url";
 
-function getURL(){ return localStorage.getItem(SHEET_KEY)||""; }
+function getURL(){ return "https://script.google.com/macros/s/AKfycbwfdepRU7RRv5iecya1jKrV6Zpt-pYVrgt4WygNnwT0jH4qmmAjxu7EUcQ7qh9lVC_h/exec"; }
 
 function buildTabs(){
   const el=document.getElementById('tabs');
@@ -457,7 +457,7 @@ async function saveURL(){
 // ── Init ──
 buildTabs();
 loadSess(0);
-if(!getURL()) openSetup();
+
 </script>
 </body>
 </html>
