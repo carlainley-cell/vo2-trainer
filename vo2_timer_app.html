@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>VO2 Trainer</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0d1117;
+    --surface:  #161b22;
+    --surface2: #1c2330;
+    --border:   #30363d;
+    --text:     #e6edf3;
+    --muted:    #8b949e;
+    --faint:    #484f58;
+    --z1:       #388bfd;
+    --z2:       #3fb950;
+    --z3:       #d29922;
+    --z4:       #f78166;
+    --z5:       #ff6b6b;
+    --accent:   #388bfd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; overscroll-behavior: none; }
+
+  /* ── layout ── */
+  #app { display: flex; flex-direction: column; height: 100%; max-width: 480px; margin: 0 auto; padding: 0 0 env(safe-area-inset-bottom); }
+
+  /* ── session tabs ── */
+  #tabs { display: flex; gap: 6px; padding: 14px 14px 0; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+  #tabs::-webkit-scrollbar { display: none; }
+  .tab { flex-shrink: 0; font-size: 11px; font-weight: 500; padding: 5px 12px; border-radius: 20px;
+         border: 1px solid var(--border); color: var(--muted); background: var(--surface); cursor: pointer;
+         font-family: 'DM Mono', monospace; letter-spacing: .03em; transition: all .15s; }
+  .tab.on { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* ── main clock card ── */
+  #clock-card { margin: 12px 14px 0; border-radius: 16px; overflow: hidden; border: 1px solid var(--border);
+                background: var(--surface); flex-shrink: 0; transition: border-color .4s; }
+  #phase-header { padding: 14px 18px 12px; transition: background .4s; }
+  #phase-name { font-size: 17px; font-weight: 600; letter-spacing: -.01em; }
+  #phase-sub  { font-size: 12px; margin-top: 3px; opacity: .75; font-family: 'DM Mono', monospace; }
+  #clock-body { display: flex; align-items: center; padding: 10px 18px 14px; gap: 16px; }
+  #big-time { font-family: 'DM Mono', monospace; font-size: 56px; font-weight: 500;
+              letter-spacing: -2px; color: var(--text); min-width: 130px; line-height: 1; }
+  #next-box { flex: 1; background: var(--surface2); border-radius: 10px; padding: 10px 12px; border: 1px solid var(--border); }
+  #next-lbl { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; letter-spacing: .05em; margin-bottom: 4px; }
+  #next-val { font-size: 13px; font-weight: 500; line-height: 1.3; }
+  #prog-track { height: 3px; background: var(--border); }
+  #prog-fill  { height: 100%; width: 0%; transition: width .8s linear; }
+
+  /* ── hr prompt ── */
+  #hr-prompt { margin: 0 14px; padding: 10px 14px; border-radius: 10px; font-size: 12px;
+               border-left: 3px solid var(--faint); background: var(--surface); color: var(--muted);
+               display: none; margin-top: 10px; transition: all .3s; font-style: italic; flex-shrink: 0; }
+
+  /* ── controls ── */
+  #controls { display: flex; gap: 8px; padding: 12px 14px 0; flex-shrink: 0; }
+  .ctrl { flex: 1; padding: 13px; border-radius: 12px; font-size: 14px; font-weight: 600;
+          border: 1px solid var(--border); cursor: pointer; font-family: 'DM Sans', sans-serif;
+          transition: all .15s; letter-spacing: -.01em; }
+  #btn-start { background: var(--accent); color: #fff; border-color: var(--accent); }
+  #btn-start:active { transform: scale(.97); }
+  #btn-reset { background: var(--surface); color: var(--muted); }
+  #btn-reset:active { transform: scale(.97); }
+
+  /* ── interval list ── */
+  #int-scroll { flex: 1; overflow-y: auto; padding: 10px 14px 14px; scrollbar-width: thin;
+                scrollbar-color: var(--border) transparent; }
+  #int-list { border-radius: 12px; overflow: hidden; border: 1px solid var(--border); }
+  .int-row { display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+             border-bottom: 1px solid var(--border); transition: background .3s; }
+  .int-row:last-child { border-bottom: none; }
+  .int-row.cur { background: var(--surface2); }
+  .int-row.done { opacity: .3; }
+  .int-num { width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center;
+             justify-content: center; font-size: 10px; font-weight: 600; flex-shrink: 0;
+             font-family: 'DM Mono', monospace; }
+  .int-info { flex: 1; min-width: 0; }
+  .int-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .int-detail { font-size: 11px; color: var(--muted); margin-top: 1px; font-family: 'DM Mono', monospace;
+                white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .int-dur { font-size: 11px; color: var(--faint); flex-shrink: 0; font-family: 'DM Mono', monospace; }
+
+  /* ── log modal ── */
+  #log-overlay { position: absolute; inset: 0; background: rgba(13,17,23,.92); display: none;
+                 align-items: flex-end; justify-content: center; z-index: 100; }
+  #log-overlay.show { display: flex; }
+  #log-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 20px 20px 0 0;
+               padding: 20px 18px calc(20px + env(safe-area-inset-bottom)); width: 100%; max-width: 480px; }
+  #log-modal h2 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+  .log-field { margin-bottom: 12px; }
+  .log-field label { display: block; font-size: 11px; color: var(--muted); font-family: 'DM Mono', monospace;
+                     letter-spacing: .05em; margin-bottom: 5px; }
+  .log-field input, .log-field textarea, .log-field select {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+    color: var(--text); font-size: 14px; padding: 9px 12px; font-family: 'DM Sans', sans-serif;
+    outline: none; transition: border-color .15s; }
+  .log-field input:focus, .log-field textarea:focus { border-color: var(--accent); }
+  .log-field textarea { resize: none; height: 64px; }
+  .log-row { display: flex; gap: 8px; }
+  .log-row .log-field { flex: 1; }
+  #log-status { font-size: 12px; color: var(--muted); text-align: center; margin-top: 8px; min-height: 18px; font-family: 'DM Mono', monospace; }
+  #btn-log-submit { width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none;
+                    border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-top: 4px; }
+  #btn-log-cancel { width: 100%; padding: 11px; background: transparent; color: var(--muted);
+                    border: 1px solid var(--border); border-radius: 12px; font-size: 14px; cursor: pointer;
+                    font-family: 'DM Sans', sans-serif; margin-top: 8px; }
+
+  /* ── setup modal ── */
+  #setup-overlay { position: absolute; inset: 0; background: rgba(13,17,23,.97); display: flex;
+                   align-items: center; justify-content: center; z-index: 200; padding: 20px; }
+  #setup-modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+                 padding: 24px 20px; width: 100%; max-width: 440px; }
+  #setup-modal h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  #setup-modal p  { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 16px; }
+  #setup-modal ol { font-size: 13px; color: var(--muted); line-height: 1.9; padding-left: 18px; margin-bottom: 18px; }
+  #setup-modal ol li { margin-bottom: 2px; }
+  #setup-modal ol code { font-family: 'DM Mono', monospace; font-size: 12px; background: var(--surface2);
+                          padding: 1px 5px; border-radius: 4px; color: var(--text); }
+  #url-input { width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
+               color: var(--text); font-size: 13px; padding: 10px 12px; font-family: 'DM Mono', monospace;
+               outline: none; margin-bottom: 10px; }
+  #url-input:focus { border-color: var(--accent); }
+  #btn-save-url { width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none;
+                  border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: 'DM Sans', sans-serif; }
+  #btn-skip-url { width: 100%; padding: 11px; background: transparent; color: var(--muted); border: 1px solid var(--border);
+                  border-radius: 12px; font-size: 13px; cursor: pointer; font-family: 'DM Sans', sans-serif; margin-top: 8px; }
+  #setup-test-status { font-size: 12px; text-align: center; margin-bottom: 8px; min-height: 18px; font-family: 'DM Mono', monospace; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="tabs"></div>
+  <div id="clock-card">
+    <div id="phase-header">
+      <div id="phase-name">Ready</div>
+      <div id="phase-sub">Select a session and press Start</div>
+    </div>
+    <div id="clock-body">
+      <div id="big-time">0:00</div>
+      <div id="next-box">
+        <div id="next-lbl">NEXT PHASE</div>
+        <div id="next-val">—</div>
+      </div>
+    </div>
+    <div id="prog-track"><div id="prog-fill"></div></div>
+  </div>
+  <div id="hr-prompt"></div>
+  <div id="controls">
+    <button class="ctrl" id="btn-start" onclick="toggleTimer()">Start</button>
+    <button class="ctrl" id="btn-reset" onclick="resetTimer()">Reset</button>
+    <button class="ctrl" style="flex:0;padding:13px 14px;font-size:16px" onclick="openLog()" title="Log session">↗</button>
+    <button class="ctrl" style="flex:0;padding:13px 14px;font-size:16px" onclick="openSetup()" title="Settings">⚙</button>
+  </div>
+  <div id="int-scroll"><div id="int-list"></div></div>
+</div>
+
+<!-- Log modal -->
+<div id="log-overlay">
+  <div id="log-modal">
+    <h2>Log session to Google Sheets</h2>
+    <div class="log-row">
+      <div class="log-field"><label>PEAK HR (BPM)</label><input type="number" id="f-peak" placeholder="e.g. 141"></div>
+      <div class="log-field"><label>AVG HR (BPM)</label><input type="number" id="f-avg" placeholder="e.g. 128"></div>
+    </div>
+    <div class="log-row">
+      <div class="log-field"><label>RPE (1–10)</label><input type="number" id="f-rpe" min="1" max="10" placeholder="7"></div>
+      <div class="log-field"><label>COMPLETED ALL INTERVALS?</label>
+        <select id="f-complete"><option value="Yes">Yes</option><option value="No">No</option><option value="Partial">Partial</option></select>
+      </div>
+    </div>
+    <div class="log-field"><label>NOTES</label><textarea id="f-notes" placeholder="How did it feel? Any HR recovery issues?"></textarea></div>
+    <div id="log-status"></div>
+    <button id="btn-log-submit" onclick="submitLog()">Send to Google Sheets</button>
+    <button id="btn-log-cancel" onclick="closeLog()">Cancel</button>
+  </div>
+</div>
+
+<!-- Setup modal -->
+<div id="setup-overlay">
+  <div id="setup-modal">
+    <h2>Connect Google Sheets</h2>
+    <p>One-time setup — takes about 2 minutes. The app will write directly to your Sheet after each session.</p>
+    <ol>
+      <li>Open your Google Sheet</li>
+      <li>Click <code>Extensions</code> → <code>Apps Script</code></li>
+      <li>Paste the <strong>SheetLogger.gs</strong> script (provided separately)</li>
+      <li>Click <code>Deploy</code> → <code>New deployment</code> → <code>Web app</code></li>
+      <li>Set <em>Execute as:</em> <code>Me</code> &amp; <em>Who has access:</em> <code>Anyone</code></li>
+      <li>Click Deploy, authorise, then copy the Web app URL</li>
+    </ol>
+    <input id="url-input" type="url" placeholder="Paste your Web app URL here…">
+    <div id="setup-test-status"></div>
+    <button id="btn-save-url" onclick="saveURL()">Save &amp; test connection</button>
+    <button id="btn-skip-url" onclick="skipSetup()">Skip for now (no Sheets logging)</button>
+  </div>
+</div>
+
+<script>
+const SESSIONS = [
+  { day:"Mon", name:"Stair Climber HIIT", dur:25, phases:[
+    {n:"Warm-up",            sub:"Z2 · 98–114 bpm · Easy pace, no rails",              secs:300, zk:"z2", hr:"Stay easy — reach 98–114 bpm before first interval"},
+    {n:"Work 1",             sub:"Z4 · 130–147 bpm · Drive through heel, full steps",  secs:45,  zk:"z4", hr:"Push hard — target 130–147 bpm. Hands off rails!"},
+    {n:"Rest 1",             sub:"Z3 · <130 bpm · Drop speed, breathe",               secs:60,  zk:"z3", hr:"HR must drop below 130 before next interval"},
+    {n:"Work 2",             sub:"Z4 · 130–147 bpm · Match interval 1 pace",           secs:45,  zk:"z4", hr:"Same effort as interval 1."},
+    {n:"Rest 2",             sub:"Z3 · <130 bpm · Easy steps, nose-breathe",          secs:60,  zk:"z3", hr:"Breathe through your nose if you can"},
+    {n:"Work 3",             sub:"Z4 · 130–147 bpm · Upright posture, no leaning",     secs:45,  zk:"z4", hr:"Stay upright — don't lean on the machine"},
+    {n:"Rest 3",             sub:"Z3 · <130 bpm · Extend if HR still >135",           secs:60,  zk:"z3", hr:"Still above 135? Add 30 seconds here."},
+    {n:"Work 4",             sub:"Z4 · 130–147 bpm · Try double-stepping",             secs:45,  zk:"z4", hr:"Half-way! Double-step if feeling strong."},
+    {n:"Rest 4",             sub:"Z3 · <130 bpm · Check recovery speed",              secs:60,  zk:"z3", hr:"4 of 8 done. HR recovering well?"},
+    {n:"Work 5",             sub:"Z4 · 130–147 bpm · Adaptation happening now",        secs:45,  zk:"z4", hr:"These last 4 intervals are the real stimulus"},
+    {n:"Rest 5",             sub:"Z3 · <130 bpm · Relax shoulders, slow breathing",   secs:60,  zk:"z3", hr:"Relax. Drop your shoulders. Slow breath."},
+    {n:"Work 6",             sub:"Z4 · 130–147 bpm · Match early interval pace",       secs:45,  zk:"z4", hr:"Don't fade — match your early effort"},
+    {n:"Rest 6",             sub:"Z3 · <130 bpm · Shorten next if HR not dropping",   secs:60,  zk:"z3", hr:"Not recovering? Shorten next interval to 30s"},
+    {n:"Work 7",             sub:"Z4 · 130–147 bpm · Full steps, upright",             secs:45,  zk:"z4", hr:"One more after this. Everything you have."},
+    {n:"Rest 7",             sub:"Z3 · <130 bpm · Almost there",                       secs:60,  zk:"z3", hr:"One interval left. Nearly done."},
+    {n:"Work 8",             sub:"Z4 · 130–147 bpm · FINAL interval",                  secs:45,  zk:"z4", hr:"FINAL push — stay in Zone 4!"},
+    {n:"Rest 8",             sub:"Z3 · <130 bpm · Let HR settle",                     secs:60,  zk:"z3", hr:"Intervals complete! Well done."},
+    {n:"Cool-down",          sub:"Z2 · <114 bpm · Slowest pace",                      secs:180, zk:"cool",hr:"HR below 100 before stepping off"},
+    {n:"Walking cool-down",  sub:"Z1 · <98 bpm · Step off and stretch",              secs:180, zk:"z1",  hr:"Stretch hip flexors and calves"},
+    {n:"Done",               sub:"Log your session →",                                secs:0,   zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+  ]},
+  { day:"Tue", name:"Rowing Zone 2", dur:28, phases:[
+    {n:"Warm-up",      sub:"Z1–2 · <110 bpm · Legs first, then lean, then arms", secs:180,  zk:"z2",  hr:"Focus on technique before raising intensity"},
+    {n:"Zone 2 steady",sub:"Z2 · 98–114 bpm · Conversational pace",              secs:1320, zk:"z2",  hr:"If you can't hold a conversation, slow down"},
+    {n:"Cool-down",    sub:"Z1 · <98 bpm · Reduce stroke rate",                  secs:180,  zk:"cool",hr:"Slow the stroke rate right down"},
+    {n:"Done",         sub:"Log your session →",                                  secs:0,    zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+  ]},
+  { day:"Wed", name:"Cycling Threshold", dur:25, phases:[
+    {n:"Warm-up",          sub:"Z2 · 98–114 bpm · Easy spin 80–90 rpm",       secs:300, zk:"z2",  hr:"Find comfortable resistance before building"},
+    {n:"Build to threshold",sub:"Z3 · 114–130 bpm · Gradually increase load", secs:300, zk:"z3",  hr:"Increase resistance steadily — don't spike HR"},
+    {n:"Threshold hold",   sub:"Z4 · 130–147 bpm · Hard but sustainable",     secs:480, zk:"z4",  hr:"Short sentences only. Key part of this session."},
+    {n:"Tempo recovery",   sub:"Z3 · 114–130 bpm · Reduce resistance",        secs:240, zk:"z3",  hr:"Maintain cadence, just reduce resistance"},
+    {n:"Cool-down",        sub:"Z1–2 · <110 bpm · Easy spin, flush legs",     secs:180, zk:"cool",hr:"Low resistance, let HR drop naturally"},
+    {n:"Done",             sub:"Log your session →",                            secs:0,   zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+  ]},
+  { day:"Thu", name:"Incline Walk Recovery", dur:30, phases:[
+    {n:"Flat warm-up",       sub:"Z1 · <98 bpm · 0% incline",                secs:120,  zk:"z1",  hr:"Active recovery day — keep it easy"},
+    {n:"Build incline",      sub:"Z2 · 98–114 bpm · Increase to 6–8%",       secs:180,  zk:"z2",  hr:"Same walking pace, just increase the incline"},
+    {n:"Zone 2 incline walk",sub:"Z2 · 98–114 bpm · Full conversation pace", secs:1320, zk:"z2",  hr:"You should be able to hold a full conversation"},
+    {n:"Cool-down flat",     sub:"Z1 · <98 bpm · Remove incline",            secs:180,  zk:"cool",hr:"Reduce incline to 0%, slow pace"},
+    {n:"Done",               sub:"Log your session →",                        secs:0,    zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+  ]},
+  { day:"Fri", name:"Combo HIIT", dur:25, phases:[
+    {n:"Warm-up (bike)",  sub:"Z2 · 98–114 bpm · Easy spin",               secs:180, zk:"z2",  hr:"Get HR up gently before first stair interval"},
+    {n:"Work 1 (stair)",  sub:"Z4 · 130–147 bpm · Build to Zone 4",        secs:45,  zk:"z4",  hr:"Move to stair climber, build intensity"},
+    {n:"Rest 1 (bike)",   sub:"Z3 · <130 bpm · Easy spin recovery",        secs:60,  zk:"z3",  hr:"Back to bike. Keep pedalling."},
+    {n:"Work 2 (stair)",  sub:"Z4 · 130–147 bpm · Full effort",            secs:45,  zk:"z4",  hr:"Stair climber again. Full Zone 4 effort."},
+    {n:"Rest 2 (bike)",   sub:"Z3 · <130 bpm · Recovery spin",             secs:60,  zk:"z3",  hr:"Breathe through it. HR coming down?"},
+    {n:"Work 3 (stair)",  sub:"Z4 · 130–147 bpm · Drive those legs",       secs:45,  zk:"z4",  hr:"Half way through work intervals!"},
+    {n:"Rest 3 (bike)",   sub:"Z3 · <130 bpm · Recovery",                  secs:60,  zk:"z3",  hr:"3 of 6 done. Nice work."},
+    {n:"Work 4 (stair)",  sub:"Z4 · 130–147 bpm · Stay strong",            secs:45,  zk:"z4",  hr:"Match your earlier effort."},
+    {n:"Rest 4 (bike)",   sub:"Z3 · <130 bpm · Check HR",                  secs:60,  zk:"z3",  hr:"Extend rest here if HR not recovering"},
+    {n:"Work 5 (stair)",  sub:"Z4 · 130–147 bpm · Almost there",           secs:45,  zk:"z4",  hr:"One more after this — everything you have"},
+    {n:"Rest 5 (bike)",   sub:"Z3 · <130 bpm · Keep moving",               secs:60,  zk:"z3",  hr:"Don't stop — keep moving on the bike"},
+    {n:"Work 6 (stair)",  sub:"Z4 · 130–147 bpm · FINAL interval",         secs:45,  zk:"z4",  hr:"FINAL one. Everything in Zone 4!"},
+    {n:"Zone 2 finish",   sub:"Z2 · 98–114 bpm · Steady bike finish",      secs:510, zk:"z2",  hr:"Great aerobic finish — keep it steady"},
+    {n:"Cool-down",       sub:"Z1 · <98 bpm · Easy spin then walk",        secs:180, zk:"cool",hr:"Intervals complete! Excellent session."},
+    {n:"Done",            sub:"Log your session →",                          secs:0,   zk:"rest",hr:"Tap ↗ to log to Google Sheets"}
+  ]},
+  { day:"Sat", name:"Zone 2 Long", dur:30, phases:[
+    {n:"Warm-up",      sub:"Z1–2 · <110 bpm · Easy pace, good form", secs:180,  zk:"z2",  hr:"Very easy — this is an aerobic base session"},
+    {n:"Zone 2 steady",sub:"Z2 · 98–114 bpm · Long aerobic work",    secs:1440, zk:"z2",  hr:"Should feel almost too easy — that's correct"},
+    {n:"Cool-down",    sub:"Z1 · <98 bpm · Walk last 2 min",         secs:180,  zk:"cool",hr:"Rest tomorrow — you've earned it"},
+    {n:"Done",         sub:"Week complete — rest tomorrow!",           secs:0,    zk:"rest",hr:"Tap ↗ to log. Full rest day tomorrow."}
+  ]}
+];
+
+const ZK = {
+  z1:   { bg:"#0d2137", border:"#1f6feb", pill:"#388bfd", pillTxt:"#cae8ff" },
+  z2:   { bg:"#0d1f12", border:"#238636", pill:"#3fb950", pillTxt:"#aff5b4" },
+  z3:   { bg:"#271e00", border:"#bb8009", pill:"#d29922", pillTxt:"#ffe8b2" },
+  z4:   { bg:"#2d1b1b", border:"#da3633", pill:"#f78166", pillTxt:"#ffd8d3" },
+  z5:   { bg:"#3d0000", border:"#f85149", pill:"#ff6b6b", pillTxt:"#ffe0e0" },
+  cool: { bg:"#071d25", border:"#1b7c83", pill:"#39c5cf", pillTxt:"#b3f0f7" },
+  rest: { bg:"#161b22", border:"#30363d", pill:"#8b949e", pillTxt:"#e6edf3" }
+};
+
+let sess=0, phase=0, rem=0, ticker=null, running=false, peakHR=0;
+const SHEET_KEY = "vo2_sheet_url";
+
+function getURL(){ return localStorage.getItem(SHEET_KEY)||""; }
+
+function buildTabs(){
+  const el=document.getElementById('tabs');
+  el.innerHTML=SESSIONS.map((s,i)=>
+    `<button class="tab${i===0?' on':''}" onclick="loadSess(${i})">${s.day}</button>`
+  ).join('');
+}
+
+function loadSess(i){
+  sess=i; phase=0; running=false; clearInterval(ticker);
+  rem=SESSIONS[i].phases[0].secs;
+  document.querySelectorAll('.tab').forEach((t,j)=>t.classList.toggle('on',j===i));
+  renderList(); repaint(); updateBtn();
+}
+
+function zStyle(zk){
+  const z=ZK[zk]||ZK.rest;
+  return `background:${z.bg};border-color:${z.border}`;
+}
+
+function repaint(){
+  const p=SESSIONS[sess].phases[phase];
+  const z=ZK[p.zk]||ZK.rest;
+  const hdr=document.getElementById('phase-header');
+  hdr.style.background=z.bg;
+  hdr.style.borderBottom=`1px solid ${z.border}`;
+  document.getElementById('clock-card').style.borderColor=z.border;
+  document.getElementById('phase-name').textContent=p.n;
+  document.getElementById('phase-sub').textContent=p.sub;
+  document.getElementById('prog-fill').style.background=z.pill;
+
+  const s=rem>0?rem:0, m=Math.floor(s/60), sc=s%60;
+  document.getElementById('big-time').textContent=m+':'+(sc<10?'0':'')+sc;
+
+  const nxt=SESSIONS[sess].phases[phase+1];
+  document.getElementById('next-val').textContent=nxt?nxt.n:'Complete';
+
+  const pct=p.secs>0?Math.round((1-rem/p.secs)*100):100;
+  document.getElementById('prog-fill').style.width=pct+'%';
+
+  const hp=document.getElementById('hr-prompt');
+  if(running && p.hr){ hp.style.display='block'; hp.textContent=p.hr; hp.style.borderColor=z.pill; hp.style.color=z.pillTxt; hp.style.background=z.bg; }
+  else hp.style.display='none';
+}
+
+function renderList(){
+  let wi=0;
+  document.getElementById('int-list').innerHTML=SESSIONS[sess].phases.map((p,i)=>{
+    const z=ZK[p.zk]||ZK.rest;
+    const isWork=p.zk==='z4'||p.zk==='z5';
+    if(isWork) wi++;
+    const lbl=isWork?wi:(p.zk==='rest'?'✓':'·');
+    const dur=p.secs?Math.floor(p.secs/60)+'m'+(p.secs%60?(p.secs%60)+'s':''):'—';
+    const cls='int-row'+(i===phase?' cur':'')+(i<phase?' done':'');
+    return `<div class="${cls}" style="${i===phase?`background:${z.bg}`:''};border-bottom:1px solid var(--border)">
+      <div class="int-num" style="background:${z.pill}22;color:${z.pill}">${lbl}</div>
+      <div class="int-info">
+        <div class="int-name" style="${i===phase?`color:${z.pill}`:''}">${p.n}</div>
+        <div class="int-detail">${p.sub}</div>
+      </div>
+      <div class="int-dur">${dur}</div>
+    </div>`;
+  }).join('');
+
+  // scroll current phase into view
+  const rows=document.querySelectorAll('.int-row');
+  if(rows[phase]) rows[phase].scrollIntoView({block:'nearest',behavior:'smooth'});
+}
+
+function tick(){
+  const p=SESSIONS[sess].phases[phase];
+  if(rem>0){ rem--; repaint(); return; }
+  if(phase<SESSIONS[sess].phases.length-1){
+    phase++; rem=SESSIONS[sess].phases[phase].secs;
+    renderList(); repaint();
+    if(SESSIONS[sess].phases[phase].secs===0){ clearInterval(ticker); running=false; updateBtn(); openLog(); }
+  } else { clearInterval(ticker); running=false; updateBtn(); }
+}
+
+function toggleTimer(){
+  if(running){ clearInterval(ticker); running=false; }
+  else {
+    if(SESSIONS[sess].phases[phase].secs===0){ loadSess(sess); return; }
+    running=true; ticker=setInterval(tick,1000);
+  }
+  updateBtn(); repaint();
+}
+
+function resetTimer(){ clearInterval(ticker); running=false; phase=0; rem=SESSIONS[sess].phases[0].secs; renderList(); repaint(); updateBtn(); }
+
+function updateBtn(){
+  const btn=document.getElementById('btn-start');
+  const p=SESSIONS[sess].phases[phase];
+  if(p.secs===0){ btn.textContent='Restart'; btn.style.background='var(--faint)'; }
+  else if(running){ btn.textContent='Pause'; btn.style.background='#da3633'; }
+  else { btn.textContent=phase===0&&rem===SESSIONS[sess].phases[0].secs?'Start':'Resume'; btn.style.background='var(--accent)'; }
+}
+
+// ── Log modal ──
+function openLog(){
+  document.getElementById('f-peak').value='';
+  document.getElementById('f-avg').value='';
+  document.getElementById('f-rpe').value='';
+  document.getElementById('f-notes').value='';
+  document.getElementById('log-status').textContent='';
+  document.getElementById('log-overlay').classList.add('show');
+}
+function closeLog(){ document.getElementById('log-overlay').classList.remove('show'); }
+
+async function submitLog(){
+  const url=getURL();
+  const s=SESSIONS[sess];
+  const payload={
+    type:"session",
+    date: new Date().toLocaleDateString("en-GB"),
+    day:  s.day,
+    session: s.name,
+    duration: s.dur,
+    peakHR: document.getElementById('f-peak').value||"",
+    avgHR:  document.getElementById('f-avg').value||"",
+    rpe:    document.getElementById('f-rpe').value||"",
+    completed: document.getElementById('f-complete').value,
+    notes: document.getElementById('f-notes').value||""
+  };
+
+  if(!url){
+    document.getElementById('log-status').textContent='No Sheet connected — open ⚙ to set up.';
+    document.getElementById('log-status').style.color='#f78166';
+    return;
+  }
+
+  document.getElementById('log-status').textContent='Sending…';
+  document.getElementById('log-status').style.color='var(--muted)';
+  document.getElementById('btn-log-submit').disabled=true;
+
+  try {
+    await fetch(url, { method:'POST', mode:'no-cors', body: JSON.stringify(payload) });
+    document.getElementById('log-status').textContent='Logged to Google Sheets ✓';
+    document.getElementById('log-status').style.color='#3fb950';
+    setTimeout(closeLog, 1800);
+  } catch(e){
+    document.getElementById('log-status').textContent='Error — check your Sheet URL in ⚙';
+    document.getElementById('log-status').style.color='#f78166';
+  }
+  document.getElementById('btn-log-submit').disabled=false;
+}
+
+// ── Setup modal ──
+function openSetup(){
+  document.getElementById('url-input').value=getURL();
+  document.getElementById('setup-test-status').textContent='';
+  document.getElementById('setup-overlay').style.display='flex';
+}
+function skipSetup(){ document.getElementById('setup-overlay').style.display='none'; }
+
+async function saveURL(){
+  const url=document.getElementById('url-input').value.trim();
+  if(!url){ document.getElementById('setup-test-status').textContent='Please paste your Web app URL first'; return; }
+  document.getElementById('setup-test-status').textContent='Testing connection…';
+  document.getElementById('setup-test-status').style.color='var(--muted)';
+  try {
+    const r=await fetch(url, {mode:'no-cors'});
+    localStorage.setItem(SHEET_KEY, url);
+    document.getElementById('setup-test-status').textContent='Connected ✓ — logging enabled';
+    document.getElementById('setup-test-status').style.color='#3fb950';
+    setTimeout(skipSetup, 1600);
+  } catch(e){
+    document.getElementById('setup-test-status').textContent='Could not reach URL — double-check and retry';
+    document.getElementById('setup-test-status').style.color='#f78166';
+  }
+}
+
+// ── Init ──
+buildTabs();
+loadSess(0);
+if(!getURL()) openSetup();
+</script>
+</body>
+</html>
